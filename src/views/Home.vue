@@ -12,7 +12,7 @@
       <div class="col-8 offset-2 mt-2 text-center" v-if="forecast">
         <div class="card text-white bg-secondary mb-3">
           <div class="card-header">
-            Current Weather
+            {{address}}
           </div>
           <div class="card-body">
             <h4 class="card-title">{{forecast.currently.summary}}</h4>
@@ -48,21 +48,31 @@ export default {
         'partly-cloudy-day' : '☁',
         'partlye-cloudy-night' : '☁'
       },
-      location: ''
+      location: localStorage.location || '',
+      address : localStorage.address || ''
     };
   },
   name: 'home',
   mounted(){
-    this.loadWeather('37.8267','-122.4233')
+    this.loadWeather(localStorage.lat,localStorage.lng)
   },
   methods :{
     updateLocation(){
+      localStorage.location = this.location
       API.getCoordinates(this.location)
         .then(result => {
           this.loadWeather(result.latitude,result.longitude)
         });
     },
     loadWeather(lat,lng){
+      localStorage.lat = lat;
+      localStorage.lng = lng;
+       API.getAddress(lat,lng)
+      .then(result => {
+        console.log(result);
+        this.address = [result.name, result.street].join(' ');
+        localStorage.address = this.address;
+      });
       API.getForecast(lat,lng)
       .then(result => {
         console.log(result);
