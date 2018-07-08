@@ -1,7 +1,15 @@
 <template>
   <div class="home">
     <div class="row">
-      <div class="col-8 offset-2 mt-2 text-center">
+      <div class="col-8 offset-2">
+        <div class="input-group mb-3">
+          <input v-model="location" type="text" class="form-control" placeholder="Search location">
+          <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" @click="updateLocation">Search</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-8 offset-2 mt-2 text-center" v-if="forecast">
         <div class="card text-white bg-secondary mb-3">
           <div class="card-header">
             Current Weather
@@ -27,7 +35,7 @@ import API from '@/lib/api';
 export default {
   data(){
     return {
-      forecast : {},
+      forecast : null,
       icons : {
         'clear-day' : '😎',
         'clear-night' : '🌝',
@@ -39,16 +47,28 @@ export default {
         'cloudy' : '☁',
         'partly-cloudy-day' : '☁',
         'partlye-cloudy-night' : '☁'
-      }
+      },
+      location: ''
     };
   },
   name: 'home',
   mounted(){
-    API.getForecast()
+    this.loadWeather('37.8267','-122.4233')
+  },
+  methods :{
+    updateLocation(){
+      API.getCoordinates(this.location)
+        .then(result => {
+          this.loadWeather(result.latitude,result.longitude)
+        });
+    },
+    loadWeather(lat,lng){
+      API.getForecast(lat,lng)
       .then(result => {
         console.log(result);
         this.forecast = result;
       });
+    }
   }
 };
 </script>
